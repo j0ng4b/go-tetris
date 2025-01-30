@@ -52,6 +52,7 @@ func (g *Game) Update() {
     dt := rl.GetFrameTime()
 
     g.board.update()
+    g.updatePiece(g.fallSpeed * dt)
 
     // Input handle
     if rl.IsKeyDown(rl.KeyLeft) {
@@ -82,5 +83,18 @@ func (g *Game) spawnNewPiece() {
 
     g.currentPiece = g.nextPiece
     g.nextPiece = newPiece(g.bag.next(), g.board)
+}
+
+func (g *Game) updatePiece(dy float32) {
+    g.currentPiece.y += dy
+    g.currentPiece.pos.y = int(g.currentPiece.y)
+
+    if g.currentPiece.isCollision() {
+        g.currentPiece.y -= dy
+        g.currentPiece.pos.y = int(g.currentPiece.y)
+
+        g.currentPiece.lock()
+        g.spawnNewPiece()
+    }
 }
 
