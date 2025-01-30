@@ -32,6 +32,7 @@ func NewGame() *Game {
         nextPiece: nil,
 
         moveSpeed: 15.0,
+        softDropSpeed: 30.0,
     }
 
     game.spawnNewPiece()
@@ -56,7 +57,7 @@ func (g *Game) Update() {
         g.currentPiece.move(g.moveSpeed * dt)
     }
     if rl.IsKeyDown(rl.KeyDown) {
-        if !g.currentPiece.softDrop() {
+        if !g.currentPiece.softDrop(g.softDropSpeed * dt) {
             g.currentPiece.lock()
             g.spawnNewPiece()
         }

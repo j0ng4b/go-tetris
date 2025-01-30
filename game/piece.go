@@ -104,8 +104,8 @@ func (p *piece) lock() {
     }
 }
 
-func (p *piece) softDrop() bool {
-    p.y += 1
+func (p *piece) softDrop(dy float32) bool {
+    p.y += dy
     p.pos.y = int(p.y)
 
     if p.isCollision() {
@@ -118,7 +118,7 @@ func (p *piece) softDrop() bool {
 }
 
 func (p *piece) hardDrop() {
-    for p.softDrop() {}
+    for p.softDrop(1) {}
     p.lock()
 }
 
