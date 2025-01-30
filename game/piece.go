@@ -230,8 +230,9 @@ func (p *piece) softDrop(dy float32) bool {
     p.pos.y = int(p.y)
 
     if p.isCollision() {
-        p.y -= 1
+        p.y -= dy
         p.pos.y = int(p.y)
+
         return false
     }
 

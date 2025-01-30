@@ -20,6 +20,8 @@ type Game struct {
     currentPiece *piece
     nextPiece *piece
 
+    // Speeds are blocks per seconds
+    fallSpeed float32
     moveSpeed float32
     softDropSpeed float32
 }
@@ -32,6 +34,7 @@ func NewGame() *Game {
         currentPiece: nil,
         nextPiece: nil,
 
+        fallSpeed: 1.0,
         moveSpeed: 15.0,
         softDropSpeed: 30.0,
     }
