@@ -30,9 +30,31 @@ func NewGame() *Game {
     return &game
 }
 
-func (game *Game) Draw() {
-    game.board.draw()
-    game.currentPiece.draw()
+func (g *Game) Draw() {
+    g.board.draw()
+    g.currentPiece.draw()
+}
+
+func (g *Game) Update() {
+    g.board.update()
+
+    // Input handle
+    if rl.IsKeyDown(rl.KeyLeft) {
+        g.currentPiece.move(-1)
+    }
+    if rl.IsKeyDown(rl.KeyRight) {
+        g.currentPiece.move(1)
+    }
+    if rl.IsKeyDown(rl.KeyDown) {
+        if !g.currentPiece.softDrop() {
+            g.currentPiece.lock()
+            g.spawnNewPiece()
+        }
+    }
+    if rl.IsKeyPressed(rl.KeySpace) {
+        g.currentPiece.hardDrop()
+        g.spawnNewPiece()
+    }
 }
 
 func (g *Game) spawnNewPiece() {
