@@ -1,5 +1,9 @@
 package game
 
+import (
+	"github.com/gen2brain/raylib-go/raylib"
+)
+
 const (
     GAME_WINDOW_TITLE = "Go-tetris - Tetris clone on Go"
 
@@ -15,6 +19,8 @@ type Game struct {
 
     currentPiece *piece
     nextPiece *piece
+
+    moveSpeed float32
 }
 
 func NewGame() *Game {
@@ -24,6 +30,8 @@ func NewGame() *Game {
 
         currentPiece: nil,
         nextPiece: nil,
+
+        moveSpeed: 15.0,
     }
 
     game.spawnNewPiece()
@@ -36,14 +44,16 @@ func (g *Game) Draw() {
 }
 
 func (g *Game) Update() {
+    dt := rl.GetFrameTime()
+
     g.board.update()
 
     // Input handle
     if rl.IsKeyDown(rl.KeyLeft) {
-        g.currentPiece.move(-1)
+        g.currentPiece.move(-g.moveSpeed * dt)
     }
     if rl.IsKeyDown(rl.KeyRight) {
-        g.currentPiece.move(1)
+        g.currentPiece.move(g.moveSpeed * dt)
     }
     if rl.IsKeyDown(rl.KeyDown) {
         if !g.currentPiece.softDrop() {

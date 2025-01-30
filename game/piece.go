@@ -43,7 +43,12 @@ type pos struct {
 }
 
 type piece struct {
-    pos
+    pos pos
+
+    // Real piece position, used on move
+    x float32
+    y float32
+
     shape pieceShapeType
 
     *board
@@ -61,14 +66,17 @@ func newPiece(shape pieceShapeType, b *board) *piece {
         board: b,
     }
 
+    p.x = float32(p.pos.x)
+    p.y = float32(p.pos.y)
+
     return &p
 }
 
 func (p *piece) draw() {
     for _, block := range piecesShapes[p.shape] {
         rl.DrawRectangle(
-            int32(p.board.offsetX) + int32((p.x + block.x) * boardCellPixels),
-            int32(p.board.offsetY) + int32((p.y + block.y) * boardCellPixels),
+            int32(p.board.offsetX) + int32((p.pos.x + block.x) * boardCellPixels),
+            int32(p.board.offsetY) + int32((p.pos.y + block.y) * boardCellPixels),
             boardCellPixels,
             boardCellPixels,
             piecesColors[p.shape],
@@ -76,18 +84,20 @@ func (p *piece) draw() {
     }
 }
 
-func (p *piece) move(dx int) {
+func (p *piece) move(dx float32) {
     p.x += dx
+    p.pos.x = int(p.x)
 
     if p.isCollision() {
         p.x -= dx
+        p.pos.x = int(p.x)
     }
 }
 
 func (p *piece) lock() {
     for _, block := range piecesShapes[p.shape] {
-        x := p.x + block.x
-        y := p.y + block.y
+        x := p.pos.x + block.x
+        y := p.pos.y + block.y
 
         p.board.cells[y][x].empty = false
         p.board.cells[y][x].shape = p.shape
@@ -112,8 +122,8 @@ func (p *piece) hardDrop() {
 
 func (p *piece) isCollision() bool {
     for _, block := range piecesShapes[p.shape] {
-        x := p.x + block.x
-        y := p.y + block.y
+        x := p.pos.x + block.x
+        y := p.pos.y + block.y
 
         if x < 0 || x >= p.board.columns || y >= p.board.rows {
             return true
