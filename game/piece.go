@@ -106,9 +106,11 @@ func (p *piece) lock() {
 
 func (p *piece) softDrop() bool {
     p.y += 1
+    p.pos.y = int(p.y)
 
     if p.isCollision() {
         p.y -= 1
+        p.pos.y = int(p.y)
         return false
     }
 
