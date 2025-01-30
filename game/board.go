@@ -63,8 +63,24 @@ func (b *board) draw() {
                 boardCellPixels,
                 piecesColors[b.cells[row][column].shape],
             )
+
+            rl.DrawRectangleLines(
+                int32(b.offsetX + column * boardCellPixels),
+                int32(b.offsetY + row * boardCellPixels),
+                boardCellPixels,
+                boardCellPixels,
+                rl.Gray,
+            )
         }
     }
+
+    rl.DrawRectangleLines(
+        int32(b.offsetX),
+        int32(b.offsetY),
+        int32(b.columns * boardCellPixels),
+        int32(b.rows * boardCellPixels),
+        rl.White,
+    )
 }
 
 func (b *board) update() {
