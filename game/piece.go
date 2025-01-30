@@ -13,15 +13,61 @@ const (
     countPieceShapeType
 )
 
+const (
+    pieceRotation0 pieceRotation = iota
+    pieceRotation90
+    pieceRotation180
+    pieceRotation270
+    countPieceRotatios
+)
+
 var (
-    piecesShapes = [countPieceShapeType][4]pos{
-        { {0, 1}, {1, 1}, {2, 1}, {3, 1} }, // iPieceShapeType
-        { {1, 0}, {2, 0}, {1, 1}, {2, 1} }, // oPieceShapeType
-        { {1, 0}, {0, 1}, {1, 1}, {2, 1} }, // tPieceShapeType
-        { {0, 0}, {0, 1}, {1, 1}, {2, 1} }, // jPieceShapeType
-        { {2, 0}, {0, 1}, {1, 1}, {2, 1} }, // lPieceShapeType
-        { {1, 0}, {2, 0}, {0, 1}, {1, 1} }, // sPieceShapeType
-        { {0, 0}, {1, 0}, {1, 1}, {2, 1} }, // zPieceShapeType
+    piecesShapes = [countPieceShapeType][4][4]pos{
+        { // iPieceShapeType
+            { {0, 1}, {1, 1}, {2, 1}, {3, 1} }, // 0°
+            { {1, 0}, {1, 1}, {1, 2}, {1, 3} }, // 90°
+            { {0, 1}, {1, 1}, {2, 1}, {3, 1} }, // 180°
+            { {1, 0}, {1, 1}, {1, 2}, {1, 3} }, // 270°
+        },
+
+        { // oPieceShapeType
+            { {1, 0}, {2, 0}, {1, 1}, {2, 1} },
+        },
+
+        { // tPieceShapeType
+            { {0, 0}, {1, 0}, {2, 0}, {1, 1} }, // 0°
+            { {0, 1}, {1, 0}, {1, 1}, {1, 2} }, // 90°
+            { {1, 1}, {0, 2}, {1, 2}, {2, 2} }, // 180°
+            { {2, 1}, {1, 0}, {1, 1}, {1, 2} }, // 270°
+        },
+
+        { // jPieceShapeType
+            { {0, 0}, {1, 0}, {2, 0}, {2, 1} }, // 0°
+            { {0, 2}, {1, 0}, {1, 1}, {1, 2} }, // 90°
+            { {0, 0}, {0, 1}, {1, 1}, {2, 1} }, // 180°
+            { {2, 0}, {1, 0}, {1, 1}, {1, 2} }, // 270°
+        },
+
+        { // lPieceShapeType
+            { {0, 0}, {1, 0}, {2, 0}, {0, 1} }, // 0°
+            { {0, 0}, {1, 0}, {1, 1}, {1, 2} }, // 90°
+            { {2, 0}, {0, 1}, {1, 1}, {2, 1} }, // 180°
+            { {2, 2}, {1, 0}, {1, 1}, {1, 2} }, // 270°
+        },
+
+        { // sPieceShapeType
+            { {1, 0}, {2, 0}, {0, 1}, {1, 1} }, // 0°
+            { {0, 0}, {0, 1}, {1, 1}, {1, 2} }, // 90°
+            { {1, 0}, {2, 0}, {0, 1}, {1, 1} }, // 180°
+            { {0, 0}, {0, 1}, {1, 1}, {1, 2} }, // 270°
+        },
+
+        { // zPieceShapeType
+            { {0, 0}, {1, 0}, {1, 1}, {2, 1} }, // 0°
+            { {2, 0}, {1, 1}, {2, 1}, {1, 2} }, // 90°
+            { {0, 0}, {1, 0}, {1, 1}, {2, 1} }, // 180°
+            { {2, 0}, {1, 1}, {2, 1}, {1, 2} }, // 270°
+        },
     }
 
     piecesColors = [countPieceShapeType]rl.Color{
@@ -36,6 +82,7 @@ var (
 )
 
 type pieceShapeType byte
+type pieceRotation byte
 
 type pos struct {
     x int
@@ -50,6 +97,7 @@ type piece struct {
     y float32
 
     shape pieceShapeType
+    rotation pieceRotation
 
     *board
 }
@@ -62,6 +110,7 @@ func newPiece(shape pieceShapeType, b *board) *piece {
         },
 
         shape: shape,
+        rotation: pieceRotation0,
 
         board: b,
     }
@@ -73,7 +122,7 @@ func newPiece(shape pieceShapeType, b *board) *piece {
 }
 
 func (p *piece) draw() {
-    for _, block := range piecesShapes[p.shape] {
+    for _, block := range piecesShapes[p.shape][p.rotation] {
         rl.DrawRectangle(
             int32(p.board.offsetX) + int32((p.pos.x + block.x) * boardCellPixels),
             int32(p.board.offsetY) + int32((p.pos.y + block.y) * boardCellPixels),
@@ -94,8 +143,40 @@ func (p *piece) move(dx float32) {
     }
 }
 
+func (p *piece) rotate(clockwise bool) {
+    if p.shape == oPieceShapeType {
+        return
+    }
+
+    switch p.rotation {
+    case pieceRotation0:
+        p.rotation = pieceRotation90
+        if !clockwise {
+            p.rotation = pieceRotation270
+        }
+
+    case pieceRotation90:
+        p.rotation = pieceRotation180
+        if !clockwise {
+            p.rotation = pieceRotation0
+        }
+
+    case pieceRotation180:
+        p.rotation = pieceRotation270
+        if !clockwise {
+            p.rotation = pieceRotation90
+        }
+
+    case pieceRotation270:
+        p.rotation = pieceRotation0
+        if !clockwise {
+            p.rotation = pieceRotation180
+        }
+    }
+}
+
 func (p *piece) lock() {
-    for _, block := range piecesShapes[p.shape] {
+    for _, block := range piecesShapes[p.shape][p.rotation] {
         x := p.pos.x + block.x
         y := p.pos.y + block.y
 
@@ -123,7 +204,7 @@ func (p *piece) hardDrop() {
 }
 
 func (p *piece) isCollision() bool {
-    for _, block := range piecesShapes[p.shape] {
+    for _, block := range piecesShapes[p.shape][p.rotation] {
         x := p.pos.x + block.x
         y := p.pos.y + block.y
 

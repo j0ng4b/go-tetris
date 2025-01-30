@@ -21,6 +21,7 @@ type Game struct {
     nextPiece *piece
 
     moveSpeed float32
+    softDropSpeed float32
 }
 
 func NewGame() *Game {
@@ -55,6 +56,9 @@ func (g *Game) Update() {
     }
     if rl.IsKeyDown(rl.KeyRight) {
         g.currentPiece.move(g.moveSpeed * dt)
+    }
+    if rl.IsKeyPressed(rl.KeyUp) {
+        g.currentPiece.rotate(true)
     }
     if rl.IsKeyDown(rl.KeyDown) {
         if !g.currentPiece.softDrop(g.softDropSpeed * dt) {
