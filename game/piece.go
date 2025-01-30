@@ -137,7 +137,18 @@ func newPiece(shape pieceShapeType, b *board) *piece {
     return &p
 }
 
-func (p *piece) draw() {
+func (p *piece) draw(ghost bool) {
+    var ghostPos pos
+    oldX, oldY := p.x, p.y
+
+    if ghost {
+        for p.softDrop(1) {}
+        ghostPos = p.pos
+
+        p.x, p.y = oldX, oldY
+        p.pos.x, p.pos.y = int(p.x), int(p.y)
+    }
+
     for _, block := range piecesShapes[p.shape][p.rotation] {
         rl.DrawRectangle(
             int32(p.board.offsetX) + int32((p.pos.x + block.x) * boardCellPixels),
@@ -146,6 +157,19 @@ func (p *piece) draw() {
             boardCellPixels,
             piecesColors[p.shape],
         )
+
+        if ghost {
+            color := piecesColors[p.shape]
+            color.A = 80
+
+            rl.DrawRectangle(
+                int32(p.board.offsetX) + int32((ghostPos.x + block.x) * boardCellPixels),
+                int32(p.board.offsetY) + int32((ghostPos.y + block.y) * boardCellPixels),
+                boardCellPixels,
+                boardCellPixels,
+                color,
+            )
+        }
     }
 }
 

@@ -24,6 +24,8 @@ type Game struct {
     fallSpeed float32
     moveSpeed float32
     softDropSpeed float32
+
+    drawGhost bool
 }
 
 func NewGame() *Game {
@@ -37,6 +39,8 @@ func NewGame() *Game {
         fallSpeed: 1.0,
         moveSpeed: 15.0,
         softDropSpeed: 30.0,
+
+        drawGhost: true,
     }
 
     game.spawnNewPiece()
@@ -45,7 +49,7 @@ func NewGame() *Game {
 
 func (g *Game) Draw() {
     g.board.draw()
-    g.currentPiece.draw()
+    g.currentPiece.draw(g.drawGhost)
 }
 
 func (g *Game) Update() {
