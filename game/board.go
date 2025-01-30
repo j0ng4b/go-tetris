@@ -69,7 +69,7 @@ func (b *board) draw() {
                 int32(b.offsetY + row * boardCellPixels),
                 boardCellPixels,
                 boardCellPixels,
-                rl.Gray,
+                rl.White,
             )
         }
     }

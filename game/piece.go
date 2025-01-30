@@ -148,6 +148,8 @@ func (p *piece) rotate(clockwise bool) {
         return
     }
 
+    oldRotation := p.rotation
+
     switch p.rotation {
     case pieceRotation0:
         p.rotation = pieceRotation90
@@ -172,6 +174,10 @@ func (p *piece) rotate(clockwise bool) {
         if !clockwise {
             p.rotation = pieceRotation180
         }
+    }
+
+    if p.isCollision() {
+        p.rotation = oldRotation
     }
 }
 
