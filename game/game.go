@@ -1,9 +1,5 @@
 package game
 
-import (
-    "github.com/gen2brain/raylib-go/raylib"
-)
-
 const (
     GAME_WINDOW_TITLE = "Go-tetris - Tetris clone on Go"
 
@@ -14,7 +10,8 @@ const (
 )
 
 type Game struct {
-    *board
+    bag *piecesBag
+    board *board
 
     currentPiece *piece
     nextPiece *piece
@@ -22,11 +19,14 @@ type Game struct {
 
 func NewGame() *Game {
     game := Game{
+        bag: newPiecesBag(pieceBagDefaultSize),
         board: newBoard(boardDefaultRows, boardDefaultColumns),
+
+        currentPiece: nil,
+        nextPiece: nil,
     }
 
-    game.currentPiece = newPiece(oPieceShapeType, game.board)
-
+    game.spawnNewPiece()
     return &game
 }
 
@@ -35,7 +35,12 @@ func (game *Game) Draw() {
     game.currentPiece.draw()
 }
 
-func (game *Game) Update() {
-    game.board.update()
+func (g *Game) spawnNewPiece() {
+    if g.nextPiece == nil {
+        g.nextPiece = newPiece(g.bag.next(), g.board)
+    }
+
+    g.currentPiece = g.nextPiece
+    g.nextPiece = newPiece(g.bag.next(), g.board)
 }
 
