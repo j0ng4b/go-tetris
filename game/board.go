@@ -36,9 +36,10 @@ func newBoard(rows, columns int) *board {
         offsetX: (rl.GetScreenWidth() - columns * boardCellPixels) / 2,
         offsetY: (rl.GetScreenHeight() - rows * boardCellPixels) / 2,
     }
+    b.rows += b.hiddenRows
 
-    b.cells = make([][]boardCell, rows)
-    for row := 0; row < rows; row++ {
+    b.cells = make([][]boardCell, b.rows)
+    for row := 0; row < b.rows; row++ {
         b.cells[row] = make([]boardCell, columns)
         for column := 0; column < columns; column++ {
             b.cells[row][column].empty = true;
@@ -49,15 +50,7 @@ func newBoard(rows, columns int) *board {
 }
 
 func (b *board) draw() {
-    rl.DrawRectangleLines(
-        int32(b.offsetX),
-        int32(b.offsetY),
-        int32(b.columns * boardCellPixels),
-        int32(b.rows * boardCellPixels),
-        rl.White,
-    )
-
-    for row := 0; row < b.rows; row++ {
+    for row := b.hiddenRows; row < b.rows; row++ {
         for column := 0; column < b.columns; column++ {
             if b.cells[row][column].empty {
                 continue
@@ -130,12 +123,5 @@ func (b *board) fallRows(row int) {
     if !emptyRow {
         b.fallRows(row - 1)
     }
-}
-
-func (b *board) checkPieceCollision(p piece) bool {
-    rows := float32(b.rows)
-    columns := float32(b.columns)
-
-    return p.pos.x < 0 || p.pos.x > columns || p.pos.y < 0 || p.pos.y > rows
 }
 
