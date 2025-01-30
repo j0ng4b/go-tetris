@@ -1,6 +1,8 @@
 package game
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"github.com/gen2brain/raylib-go/raylib"
+)
 
 const (
     iPieceShapeType pieceShapeType = iota
@@ -78,6 +80,20 @@ var (
         { R: 250, G: 140, B: 10,  A: 255 }, // lPieceShapeType
         { R: 16,  G: 210, B: 40,  A: 255 }, // sPieceShapeType
         { R: 220, G: 40,  B: 40,  A: 255 }, // zPieceShapeType
+    }
+
+    pieceWallKick = [countPieceRotations][5]pos {
+        { {0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}, }, // 0° → 90°
+        { {0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}, }, // 90° → 180°
+        { {0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}, }, // 180° → 270°
+        { {0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}, }, // 270° → 0°
+    }
+
+    iPieceWallKick = [countPieceRotations][5]pos {
+        { {0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}, }, // 0° → 90°
+        { {0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}, }, // 90° → 180°
+        { {0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}, }, // 180° → 270°
+        { {0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}, }, // 270° → 0°
     }
 )
 
@@ -176,9 +192,27 @@ func (p *piece) rotate(clockwise bool) {
         }
     }
 
-    if p.isCollision() {
-        p.rotation = oldRotation
+    wallKicks := pieceWallKick[oldRotation]
+    if p.shape == iPieceShapeType {
+        wallKicks = iPieceWallKick[oldRotation]
     }
+
+    for _, kick := range wallKicks {
+        p.pos.x += kick.x
+        p.pos.y += kick.y
+
+        if !p.isCollision() {
+            p.x = float32(p.pos.x)
+            p.y = float32(p.pos.y)
+
+            return
+        }
+
+        p.pos.x -= kick.x
+        p.pos.y -= kick.y
+    }
+
+    p.rotation = oldRotation
 }
 
 func (p *piece) lock() {
