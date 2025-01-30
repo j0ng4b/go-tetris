@@ -37,7 +37,7 @@ func NewGame() *Game {
         nextPiece: nil,
 
         fallSpeed: 1.0,
-        moveSpeed: 15.0,
+        moveSpeed: 11.0,
         softDropSpeed: 30.0,
 
         drawGhost: true,
@@ -59,16 +59,16 @@ func (g *Game) Update() {
     g.updatePiece(g.fallSpeed * dt)
 
     // Input handle
-    if rl.IsKeyDown(rl.KeyLeft) {
+    if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
         g.currentPiece.move(-g.moveSpeed * dt)
     }
-    if rl.IsKeyDown(rl.KeyRight) {
+    if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
         g.currentPiece.move(g.moveSpeed * dt)
     }
-    if rl.IsKeyPressed(rl.KeyUp) {
+    if rl.IsKeyPressed(rl.KeyUp) || rl.IsKeyPressed(rl.KeyW) {
         g.currentPiece.rotate(true)
     }
-    if rl.IsKeyDown(rl.KeyDown) {
+    if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
         if !g.currentPiece.softDrop(g.softDropSpeed * dt) {
             g.currentPiece.lock()
             g.spawnNewPiece()
