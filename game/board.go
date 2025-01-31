@@ -90,7 +90,7 @@ func (b *board) update() {
         }
 
         if b.isRowFull(row, 0) {
-            b.cleanRow(row)
+            b.clearRow(row)
             b.fallRows(row - 1)
         }
     }
@@ -116,7 +116,7 @@ func (b *board) isRowFull(row, column int) bool {
     return false
 }
 
-func (b *board) cleanRow(row int) {
+func (b *board) clearRow(row int) {
     for column := 0; column < b.columns; column++ {
         b.cells[row][column].empty = true
     }
