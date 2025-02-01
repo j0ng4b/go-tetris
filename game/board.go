@@ -25,6 +25,7 @@ type board struct {
     offsetY int
 
     cells [][]boardCell
+    clearedRows int
 }
 
 func newBoard(rows, columns int) *board {
@@ -35,6 +36,8 @@ func newBoard(rows, columns int) *board {
 
         offsetX: (rl.GetScreenWidth() - columns * boardCellPixels) / 2,
         offsetY: (rl.GetScreenHeight() - rows * boardCellPixels) / 2,
+
+        clearedRows: 0,
     }
     b.rows += b.hiddenRows
 
@@ -90,6 +93,8 @@ func (b *board) update() {
         }
 
         if b.isRowFull(row, 0) {
+            b.clearedRows += 1
+
             b.clearRow(row)
             b.fallRows(row - 1)
         }

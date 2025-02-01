@@ -26,6 +26,8 @@ type Game struct {
     softDropSpeed float32
 
     drawGhost bool
+
+    level int
 }
 
 func NewGame() *Game {
@@ -41,6 +43,8 @@ func NewGame() *Game {
         softDropSpeed: 30.0,
 
         drawGhost: true,
+
+        level: 0,
     }
 
     game.spawnNewPiece()
@@ -58,6 +62,8 @@ func (g *Game) Update() {
     dt := rl.GetFrameTime()
 
     g.board.update()
+    g.updateGravity()
+
     g.updatePiece(g.fallSpeed * dt)
 
     // Input handle
@@ -108,5 +114,21 @@ func (g *Game) updatePiece(dy float32) {
         g.currentPiece.lock()
         g.spawnNewPiece()
     }
+}
+
+func (g *Game) updateGravity() {
+    var frameDelay float32
+
+    if g.level = g.board.clearedRows / 10; g.level >= 29 {
+        frameDelay = 1
+    } else {
+        frameDelay = []float32{
+            48, 43, 38, 33, 28, 23, 18, 13, 8, 6, // Levels 0–9
+            5, 5, 5, 5, 5, 5, 5, 5, 5, 5,         // Levels 10–19
+            5, 5, 5, 5, 5, 5, 5, 5, 5, 5,         // Levels 20–29
+        }[g.level]
+    }
+
+    g.fallSpeed = (1.0 / frameDelay) * GAME_FPS
 }
 
