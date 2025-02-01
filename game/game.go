@@ -49,7 +49,9 @@ func NewGame() *Game {
 
 func (g *Game) Draw() {
     g.board.draw()
+
     g.currentPiece.draw(g.drawGhost)
+    g.nextPiece.draw(false)
 }
 
 func (g *Game) Update() {
@@ -85,8 +87,14 @@ func (g *Game) spawnNewPiece() {
         g.nextPiece = newPiece(g.bag.next(), g.board)
     }
 
+    g.nextPiece.y = 0
+    g.nextPiece.pos.y = 0
+
     g.currentPiece = g.nextPiece
     g.nextPiece = newPiece(g.bag.next(), g.board)
+
+    g.nextPiece.y -= 4
+    g.nextPiece.pos.y -= 4
 }
 
 func (g *Game) updatePiece(dy float32) {
