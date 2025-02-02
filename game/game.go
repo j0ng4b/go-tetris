@@ -1,6 +1,8 @@
 package game
 
 import (
+	"time"
+
 	"github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -25,6 +27,10 @@ type Game struct {
     moveSpeed float32
     softDropSpeed float32
 
+    // Time before lock piece in seconds
+    lockDelay float32
+    lockLastTime time.Time
+
     drawGhost bool
 
     level int
@@ -41,6 +47,9 @@ func NewGame() *Game {
         fallSpeed: 1.0,
         moveSpeed: 11.0,
         softDropSpeed: 30.0,
+
+        lockDelay: 0.6,
+        lockLastTime: time.Time{},
 
         drawGhost: true,
 
@@ -65,6 +74,7 @@ func (g *Game) Update() {
     g.updateGravity()
 
     g.updatePiece(g.fallSpeed * dt)
+    g.updatePieceLock()
 
     // Input handle
     if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
@@ -78,8 +88,11 @@ func (g *Game) Update() {
     }
     if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
         if !g.currentPiece.softDrop(g.softDropSpeed * dt) {
-            g.currentPiece.lock()
-            g.spawnNewPiece()
+            if g.lockLastTime.IsZero() {
+                g.lockLastTime = time.Now()
+            }
+        } else {
+            g.lockLastTime = time.Time{}
         }
     }
     if rl.IsKeyPressed(rl.KeySpace) {
@@ -111,8 +124,11 @@ func (g *Game) updatePiece(dy float32) {
         g.currentPiece.y -= dy
         g.currentPiece.pos.y = int(g.currentPiece.y)
 
-        g.currentPiece.lock()
-        g.spawnNewPiece()
+        if g.lockLastTime.IsZero() {
+            g.lockLastTime = time.Now()
+        }
+    } else {
+        g.lockLastTime = time.Time{}
     }
 }
 
@@ -130,5 +146,21 @@ func (g *Game) updateGravity() {
     }
 
     g.fallSpeed = (1.0 / frameDelay) * GAME_FPS
+}
+
+func (g *Game) updatePieceLock() {
+    if g.lockLastTime.IsZero() {
+        return
+    }
+
+    lockTime := time.Now().Sub(g.lockLastTime)
+    if lockTime.Seconds() < float64(g.lockDelay) {
+        return
+    }
+
+    g.currentPiece.lock()
+    g.spawnNewPiece()
+
+    g.lockLastTime = time.Time{}
 }
 
