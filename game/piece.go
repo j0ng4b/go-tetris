@@ -142,8 +142,8 @@ func (p *piece) drawAtOffset(x, y int32, ghost bool) {
 
     for _, block := range piecesShapes[p.shape][p.rotation] {
         rl.DrawRectangle(
-            x + int32((p.pos.x + block.x) * boardCellPixels),
-            y + int32((p.pos.y + block.y) * boardCellPixels),
+            x + int32(block.x * boardCellPixels),
+            y + int32(block.y * boardCellPixels),
             boardCellPixels,
             boardCellPixels,
             piecesColors[p.shape],
@@ -165,7 +165,11 @@ func (p *piece) drawAtOffset(x, y int32, ghost bool) {
 }
 
 func (p *piece) draw(ghost bool) {
-    p.drawAtOffset(int32(p.board.offsetX), int32(p.board.offsetY), ghost)
+    p.drawAtOffset(
+        int32(p.board.offsetX + p.pos.x * boardCellPixels),
+        int32(p.board.offsetY + p.pos.y * boardCellPixels),
+        ghost,
+    )
 }
 
 func (p *piece) move(dx float32) {
