@@ -120,24 +120,15 @@ type piece struct {
 
 func newPiece(shape pieceShapeType, b *board) *piece {
     p := piece{
-        pos: pos{
-            x: b.columns / 2 - 2,
-            y: 0,
-        },
-
         shape: shape,
-        rotation: pieceRotation0,
-
         board: b,
     }
 
-    p.x = float32(p.pos.x)
-    p.y = float32(p.pos.y)
-
+    p.reset()
     return &p
 }
 
-func (p *piece) draw(ghost bool) {
+func (p *piece) drawAtOffset(x, y int32, ghost bool) {
     var ghostPos pos
     oldX, oldY := p.x, p.y
 
@@ -151,8 +142,8 @@ func (p *piece) draw(ghost bool) {
 
     for _, block := range piecesShapes[p.shape][p.rotation] {
         rl.DrawRectangle(
-            int32(p.board.offsetX) + int32((p.pos.x + block.x) * boardCellPixels),
-            int32(p.board.offsetY) + int32((p.pos.y + block.y) * boardCellPixels),
+            x + int32((p.pos.x + block.x) * boardCellPixels),
+            y + int32((p.pos.y + block.y) * boardCellPixels),
             boardCellPixels,
             boardCellPixels,
             piecesColors[p.shape],
@@ -171,6 +162,10 @@ func (p *piece) draw(ghost bool) {
             )
         }
     }
+}
+
+func (p *piece) draw(ghost bool) {
+    p.drawAtOffset(int32(p.board.offsetX), int32(p.board.offsetY), ghost)
 }
 
 func (p *piece) move(dx float32) {
@@ -266,6 +261,16 @@ func (p *piece) softDrop(dy float32) bool {
 func (p *piece) hardDrop() {
     for p.softDrop(1) {}
     p.lock()
+}
+
+func (p *piece) reset() {
+    p.pos.x = p.board.columns / 2 - 2
+    p.pos.y = 0
+
+    p.x = float32(p.pos.x)
+    p.y = float32(p.pos.y)
+
+    p.rotation = pieceRotation0
 }
 
 func (p *piece) isCollision() bool {
