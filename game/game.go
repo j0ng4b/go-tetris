@@ -33,6 +33,10 @@ type Game struct {
 
     drawGhost bool
 
+    heldPiece *piece
+    canHoldPiece bool
+    heldPieceDrawPosition pos
+
     level int
 }
 
@@ -53,7 +57,15 @@ func NewGame() *Game {
 
         drawGhost: true,
 
+        heldPiece: nil,
+        canHoldPiece: true,
+
         level: 0,
+    }
+
+    game.heldPieceDrawPosition = pos{
+        game.board.offsetX - boardCellPixels * 5,
+        game.board.offsetY,
     }
 
     game.spawnNewPiece()
@@ -65,6 +77,35 @@ func (g *Game) Draw() {
 
     g.currentPiece.draw(g.drawGhost)
     g.nextPiece.draw(false)
+    g.drawHeldPiece()
+}
+
+func (g *Game) drawHeldPiece() {
+    if g.heldPiece == nil {
+        rl.DrawRectangleLines(
+            int32(g.heldPieceDrawPosition.x),
+            int32(g.heldPieceDrawPosition.y),
+            int32(4 * boardCellPixels),
+            int32(4 * boardCellPixels),
+            rl.White,
+        )
+
+        return
+    }
+
+    g.heldPiece.drawAtOffset(
+        int32(g.heldPieceDrawPosition.x),
+        int32(g.heldPieceDrawPosition.y),
+        false,
+    )
+
+    rl.DrawRectangleLines(
+        int32(g.heldPieceDrawPosition.x),
+        int32(g.heldPieceDrawPosition.y),
+        int32(4 * boardCellPixels),
+        int32(4 * boardCellPixels),
+        rl.White,
+    )
 }
 
 func (g *Game) Update() {
@@ -95,9 +136,14 @@ func (g *Game) Update() {
             g.lockLastTime = time.Time{}
         }
     }
+
     if rl.IsKeyPressed(rl.KeySpace) {
         g.currentPiece.hardDrop()
         g.spawnNewPiece()
+    }
+
+    if rl.IsKeyPressed(rl.KeyC) && g.canHoldPiece {
+        g.updateHeldPiece()
     }
 }
 
@@ -114,6 +160,8 @@ func (g *Game) spawnNewPiece() {
 
     g.nextPiece.y -= 4
     g.nextPiece.pos.y -= 4
+
+    g.canHoldPiece = true
 }
 
 func (g *Game) updatePiece(dy float32) {
@@ -162,5 +210,17 @@ func (g *Game) updatePieceLock() {
     g.spawnNewPiece()
 
     g.lockLastTime = time.Time{}
+}
+
+func (g *Game) updateHeldPiece() {
+    if g.heldPiece == nil {
+        g.heldPiece = g.currentPiece
+        g.spawnNewPiece()
+    } else {
+        g.heldPiece, g.currentPiece = g.currentPiece, g.heldPiece
+    }
+
+    g.heldPiece.reset()
+    g.canHoldPiece = false;
 }
 
